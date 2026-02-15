@@ -1,32 +1,21 @@
-
-import re 
-
 from datetime import datetime
+import csv
+import io
 
 def parse_log_line(line):
+    # Skip header row
+    if line.startswith("timestamp"):
+        return None
     try:
-        parts = line.strip().split()
-
-        if len(parts) < 3:
+        row = next(csv.reader(io.StringIO(line.strip())))
+        if len(row) != 4:
             return None
-
-        timestamp_str = parts[0] + " " + parts[1]
-
-        level = parts[2]
-
-        message = " ".join(parts[3:])
-
-        timestamp = datetime.strptime(
-            timestamp_str,
-            "%Y-%m-%d %H:%M:%S"
-        )
-
+        timestamp_str, service, level, message = row
         return {
-            "timestamp": timestamp,
+            "timestamp": datetime.fromisoformat(timestamp_str.split(".")[0]),
+            "service": service,
             "level": level,
-            "message": message
+            "message": message,
         }
-
-    except Exception as e:
-        print("Parse error:", line)
+    except Exception:
         return None

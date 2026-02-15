@@ -1,38 +1,55 @@
-import sys
-import os
-from pathlib import Path
-#sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import time 
-
-from config.dask_config import create_dask_client
-from backend.ingestion.loader import load_logs
-from backend.pipeline.processing import process_pipeline
+import time
+from backend.config.dask_config import start_dask
+from backend.pipeline.processing import build_pipeline
+from backend.anomaly.detection import detect_anomaly
+from backend.config.email_alert import send_anomaly_email
 
 def main():
-    print("Starting Log Processing...")
-    # Start Dask
-    client = create_dask_client()
-    print("Dask Started Successfully")
-    print(f"Dashboard: {client.dashboard_link}")
-    start= time.time()
-    print("start time", start)
-
-    # Load logs
-    df = process_pipeline("data/sample_log.log")
-    print("Logs Loaded Successfully")
-    print(df.compute())
-
-    print("\nLog Count by Level:")
-
-    #start = time.time()
-    result = df.count().compute()
-    print(result)
+    client = start_dask()
+    print(client)
+    print(f"Dashboard link: {client.dashboard_link}")
+    print("\n" + "=" * 50)
+    start = time.time()
+    # Build log processing pipeline
+    log_df = build_pipeline(r"C:\Users\Rohini\Desktop\LOG-ANALYTICS-MONITORING-ENGINE\backend\sample_log\data_log.log")
+    print("Parsed Log Data (Table Format):")
+    print(log_df.compute())
+    # Correct way to count rows
+    total_logs = log_df.shape[0].compute()
     end = time.time()
-    print("end time", end)
+    print("Total logs parsed:", total_logs)
+    print("Time taken:", round(end - start, 2), "seconds")
+    print("\nRunning anomaly detection...")
+    # Detect anomalies
+    anomalies = detect_anomaly(log_df)
+    # If still a Dask dataframe convert to pandas
+    if hasattr(anomalies, "compute"):
+        anomalies = anomalies.compute()
+    if anomalies.empty:
+        print("No anomalies detected")
+    else:
+        print(f"🚨 {len(anomalies)} anomalies detected!")
+        
+        for minute, row in anomalies.iterrows():
+            anomaly_data = {
+                "timestamp": minute,
+    "error_count": row.get("error_count", 0),
+    "z_score": row.get("z_score", 0)
+            }
+            send_anomaly_email(
+sender_email="",
+password="",
+ to_email="",
+anomaly=anomaly_data
+    )
 
-    client.close()
-    print("\nProcessing Finished Successfully!")
+            print(
+                f"Alert | Time: {minute} | "
+                f"Errors: {row.get('error_count')}"
+            )
 
-    
+    input("\nPress Enter to exit...")
+
+
 if __name__ == "__main__":
     main()
