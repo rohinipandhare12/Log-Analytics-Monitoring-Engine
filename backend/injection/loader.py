@@ -9,3 +9,19 @@
 #with parsing: we can filter error logs 
 #detect the unsual patterns 
 #it converts raw log data to the machine readable language 
+import re
+
+LOG_PATTERN = re.compile(
+    r"(?P<timestamp>[\d\-:\s]+)\s"
+    r"(?P<level>\w+)\s"
+    r"(?P<service>\w+)\s"
+    r"(?P<message>.*?)(?:\suser_id=(?P<user_id>\d+))?$"
+)
+#Groupdict()
+#Strip()
+#re.compile(): recompile is a method in python which is use to create regex patterns.
+#python regex: python regular expression are used for searching matching and extract the data pattern from the given text.
+#r-> raw data 
+#?-> starting of pattern code
+#P<timestamp>,P<level>,P<service>, P<message>:which is used to capture the names of particular data.
+#\s-> use to remove the white spaces between the name given. 
