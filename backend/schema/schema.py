@@ -3,10 +3,9 @@
 #1. it insures all rows follows the structure and type of data
 #2. it helps in data validation and data cleaning. 
 #3. faster processing, easier analytics (filtering, mapping, grouping, anomaly detection becomes simple and faster) 
-log_schema = { 
-"timestamp": "datetime", 
-"level": "string", 
-"service": "string", 
-"message": "string",    
-} 
+log_schema = {
+    "timestamp": "datetime64[ns]",
+    "level": "object",
+    "message": "object"
+}
 #dataframe=df.astype(log_schema)

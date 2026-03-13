@@ -1,6 +1,7 @@
 from dask.distributed import Client
 
-def create_dask_client():
+
+def start_dask():
     client = Client()
-    print("Dask client created successfully")
+    print("Dask client started successfully")
     return client

@@ -1,0 +1,28 @@
+11/03/2026
+
+timestamp	level	minute
+10:01:05	ERROR	10:01
+10:01:30	ERROR	10:01
+10:02:10	ERROR	10:02
+10:02:50	ERROR	10:02
+10:02:59	ERROR	10:02
+
+error_logs.groupby("minute")
+
+group1:minute=10:01
+timestamp	minute
+10:01:05	10:01
+10:01:30	10:01
+
+group2:minute=10:02
+10:02:10	10:02
+10:02:50	10:02
+10:02:59	10:02
+
+.size()
+minute    count
+10:01      2
+10:02      3
+
+.rename()
+.resetindex()
